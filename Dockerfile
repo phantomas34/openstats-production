@@ -1,4 +1,4 @@
-# The Final, Definitive Dockerfile
+# The Final, Unified Dockerfile for a Clean Build
 
 # Use the official R base image. It is 100% compatible.
 FROM r-base:latest
@@ -6,28 +6,24 @@ FROM r-base:latest
 # Prevent interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
-# STAGE 1: Install the most complex R packages that are available as pre-compiled system binaries.
-# This provides a rock-solid foundation.
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install a complete set of system libraries AND compilers (including gfortran).
+# This provides the necessary foundation for the pre-compiled R binaries.
+RUN apt-get update && apt-get install -y \
     build-essential \
+    gfortran \
     libcurl4-openssl-dev \
     libssl-dev \
-    # Pre-compiled R packages from the Debian repository
-    r-cran-shiny \
-    r-cran-bslib \
-    r-cran-dt \
-    r-cran-ggplot2 \
-    r-cran-dplyr \
-    r-cran-tidyr \
-    r-cran-car \
-    r-cran-psych \
-    r-cran-scales \
-    r-cran-readxl \
+    libxml2-dev \
+    libcairo2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# STAGE 2: Install the remaining, more specialized packages from the reliable Posit repository.
-# This list includes the packages that were not found in apt-get.
-RUN R -e "install.packages(c('thematic', 'rhandsontable', 'shinyWidgets', 'bsicons'), repos='https://packagemanager.posit.co/cran/latest')"
+# Install ALL R packages from a single, reliable source: The Posit Package Manager.
+# This ensures all package versions are 100% compatible with each other.
+RUN R -e "install.packages(c( \
+    'shiny', 'bslib', 'thematic', 'DT', 'ggplot2', 'dplyr', 'tidyr', \
+    'rhandsontable', 'car', 'psych', 'scales', 'readxl', \
+    'shinyWidgets', 'bsicons' \
+), repos='https://packagemanager.posit.co/cran/latest')"
 
 # --- Copy your application code ---
 RUN mkdir /app
