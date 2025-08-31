@@ -6,8 +6,8 @@ FROM r-base:latest
 # Prevent interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
-# STAGE 1: Install the most complex R packages as pre-compiled system binaries.
-# This is the most reliable method and solves the 'car' installation failure.
+# STAGE 1: Install the most complex R packages that are available as pre-compiled system binaries.
+# This provides a rock-solid foundation.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libcurl4-openssl-dev \
@@ -23,21 +23,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     r-cran-psych \
     r-cran-scales \
     r-cran-readxl \
-    r-cran-shinywidgets \
     && rm -rf /var/lib/apt/lists/*
 
-# STAGE 2: Install the few remaining packages from the reliable Posit repository.
-RUN R -e "install.packages(c('thematic', 'rhandsontable', 'bsicons'), repos='https://packagemanager.posit.co/cran/latest')"
+# STAGE 2: Install the remaining, more specialized packages from the reliable Posit repository.
+# This list includes the packages that were not found in apt-get.
+RUN R -e "install.packages(c('thematic', 'rhandsontable', 'shinyWidgets', 'bsicons'), repos='https://packagemanager.posit.co/cran/latest')"
 
 # --- Copy your application code ---
 RUN mkdir /app
 COPY . /app
 WORKDIR /app
 
-# The EXPOSE command is informational for Docker. Render will use the dynamic port.
-EXPOSE 3838
-
-# The Final COMMAND: This is the second critical fix.
-# It tells Shiny to listen on the port provided by the Render environment ($PORT),
-# defaulting to 3838 if it's not set (for local running).
+# The Final COMMAND: This dynamically uses the port provided by Render.
 CMD ["R", "-e", "options(shiny.port = as.numeric(Sys.getenv('PORT', 3838))); shiny::runApp('.', host='0.0.0.0')"]
