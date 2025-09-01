@@ -1,33 +1,28 @@
-# The Final, Definitive, Unified Dockerfile for Cloud Building
+# The Final, Unbreakable Dockerfile
 
-# Use the official R base image. It is 100% public and compatible.
-FROM r-base:latest
+# Use the official, pre-configured R Shiny App image from Posit.
+# This image contains all necessary system dependencies and compilers.
+FROM ghcr.io/r-lib/r-shiny-app:latest
 
-# Prevent interactive prompts
-ENV DEBIAN_FRONTEND=noninteractive
+# This image includes a special script to install packages reliably.
+# We just need to list the packages from your global.R file.
+# NOTE: 'shiny' and 'stats' are already included in the base image.
+RUN install-r-packages \
+    bslib \
+    thematic \
+    DT \
+    ggplot2 \
+    dplyr \
+    tidyr \
+    rhandsontable \
+    car \
+    psych \
+    scales \
+    readxl \
+    shinyWidgets \
+    bsicons
 
-# Install a complete set of system libraries AND compilers (including gfortran).
-# This provides the necessary foundation for a successful compilation on Render.
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    gfortran \
-    libcurl4-openssl-dev \
-    libssl-dev \
-    libxml2-dev \
-    libcairo2-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Copy the entire application into the '/srv/shiny-app/' directory.
+COPY . /srv/shiny-app/
 
-# Install ALL R packages from the reliable Posit binary repository.
-RUN R -e "install.packages(c( \
-    'shiny', 'bslib', 'thematic', 'DT', 'ggplot2', 'dplyr', 'tidyr', \
-    'rhandsontable', 'car', 'psych', 'scales', 'readxl', \
-    'shinyWidgets', 'bsicons' \
-), repos='https://packagemanager.posit.co/cran/latest')"
-
-# --- Copy your application code ---
-RUN mkdir /app
-COPY . /app
-WORKDIR /app
-
-# The Final COMMAND: This dynamically uses the port provided by Render.
-CMD ["R", "-e", "options(shiny.port = as.numeric(Sys.getenv('PORT', 3838))); shiny::runApp('.', host='0.0.0.0')"]
+# This image automatically handles the port and runs the app. No CMD is needed.
