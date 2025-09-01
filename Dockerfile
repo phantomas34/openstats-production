@@ -18,20 +18,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install ALL R packages, one by one, from the reliable Posit binary repository.
 # This makes any failure loud and clear, and leverages Docker's layer caching.
-RUN R -e "install.packages('shiny', repos='https://packagemanager.posit.co/cran/latest')"
-RUN R -e "install.packages('bslib', repos='https://packagemanager.posit.co/cran/latest')"
-RUN R -e "install.packages('thematic', repos='https://packagemanager.posit.co/cran/latest')"
-RUN R -e "install.packages('DT', repos='https://packagemanager.posit.co/cran/latest')"
-RUN R -e "install.packages('ggplot2', repos='https://packagemanager.posit.co/cran/latest')"
-RUN R -e "install.packages('dplyr', repos='https://packagemanager.posit.co/cran/latest')"
-RUN R -e "install.packages('tidyr', repos='https://packagemanager.posit.co/cran/latest')"
-RUN R -e "install.packages('rhandsontable', repos='https://packagemanager.posit.co/cran/latest')"
-RUN R -e "install.packages('car', repos='https://packagemanager.posit.co/cran/latest')"
-RUN R -e "install.packages('psych', repos='https://packagemanager.posit.co/cran/latest')"
-RUN R -e "install.packages('scales', repos='https://packagemanager.posit.co/cran/latest')"
-RUN R -e "install.packages('readxl', repos='https://packagemanager.posit.co/cran/latest')"
-RUN R -e "install.packages('shinyWidgets', repos='https://packagemanager.posit.co/cran/latest')"
-RUN R -e "install.packages('bsicons', repos='https://packagemanager.posit.co/cran/latest')"
+RUN R -e "install.packages(c('shiny', 'bslib', 'thematic', 'DT', 'ggplot2', 'dplyr', 'tidyr', 'rhandsontable', 'car', 'psych', 'scales', 'readxl', 'shinyWidgets', 'bsicons'), repos='https://packagemanager.posit.co/cran/latest')"
 
 # --- Copy your application code ---
 COPY . /app
